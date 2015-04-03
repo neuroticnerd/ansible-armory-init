@@ -1,0 +1,11 @@
+---
+
+change_root_passwd: no
+dist_upgrade: yes
+setup_fail2ban: yes
+configure_fail2ban: no
+
+system_groups: []
+initial_users: [ { 'name': 'devops', 'home': '/home/devops' } ]
+
+force_password_update: no

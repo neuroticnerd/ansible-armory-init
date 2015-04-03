@@ -1,0 +1,83 @@
+---
+
+- name: change root password
+  when: change_root_passwd|bool
+
+
+- name: update and upgrade system packages
+  apt:
+    upgrade: dist
+    update_cache: yes
+  when: dist_upgrade|bool
+
+
+- name: ensure localhost is defined in hosts
+  lineinfile:
+    dest: '/etc/hosts'
+    regexp: '^127\.0\.0\.1.*localhost$'
+    line: '127.0.0.1   localhost'
+    state: present
+    owner: root
+    group: root
+    mode: 0644
+
+- name: add current hostname to hosts file
+  lineinfile:
+    dest: '/etc/hosts'
+    regexp: "^127\.0\.0\.1.*{{ inventory_hostname }}$"
+    line: "127.0.0.1   {{ inventory_hostname }}  # ansible managed"
+    state: present
+    owner: root
+    group: root
+    mode: 0644
+  when: inventory_hostname is defined
+
+
+- name: install fail2ban
+  apt:
+    name: fail2ban
+    state: latest
+  when: setup_fail2ban|bool
+
+# coming soon!
+#- name: deploy fail2ban config
+#  template: src=fail2ban.conf.j2 dest=/etc/fail2ban/jail.conf mode=0644
+#  notify: restart-fail2ban
+#  when: configure_fail2ban
+
+
+- name: add system groups
+  group:
+    name: "{{ item }}"
+    state: present
+    system: yes
+  with_flattened:
+    - system_groups
+    - [ 'nopwdsudo', 'sshlogin' ]
+
+
+- name: create initial users
+  user:
+    name: "{{ item['name'] }}"
+    create_home: yes
+    home: "{{ item['home'] }}"
+    generate_ssh_key: no
+    group: # primary group
+    groups: # additional groups
+    state: present
+  register: "user_{{ item['name'] }}"
+  with_items: initial_users
+
+- name: generate random password for users only if it was just changed
+  command: "/usr/bin/openssl rand -base64 32 | passwd --stdin {{ item['name'] }}"
+  with_items: initial_users
+  when: "user_{{ item['name'] }}.changed or force_password_update|bool"
+
+- name: setup ssh for new users
+  file:
+    status: directory
+    dest: "{{ item.home }}/.ssh"
+    mode: 0700
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+  with_items: initial_users
