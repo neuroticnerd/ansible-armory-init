@@ -1,5 +1,5 @@
-ansible-armory-lockdown
-=======================
+ansible-armory-init
+===================
 
 configures the core security for a new ubuntu server
 ----------------------------------------------------
