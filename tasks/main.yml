@@ -6,4 +6,4 @@
 - include: system-upgrade.yml
 - include: hostsfile.yml
 - include: fail2ban.yml
-#- include: accounts.yml
+- include: accounts.yml

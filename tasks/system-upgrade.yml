@@ -13,7 +13,7 @@
   apt:
     update_cache: yes
     upgrade: dist
-  when: upgrades.stderr != ""
+  when: upgrades is defined and upgrades.stderr != ""
   register: upgraded
 
 - name: reboot server to apply updates
