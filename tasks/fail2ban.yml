@@ -1,0 +1,13 @@
+---
+
+- name: install fail2ban
+  apt:
+    name: fail2ban
+    state: latest
+  when: setup_fail2ban|bool
+
+# coming soon! default config is usually sufficient
+#- name: deploy fail2ban config
+#  template: src=fail2ban.conf.j2 dest=/etc/fail2ban/jail.conf mode=0644
+#  notify: restart-fail2ban
+#  when: configure_fail2ban

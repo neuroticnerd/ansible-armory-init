@@ -1,0 +1,36 @@
+---
+
+- name: add system groups
+  group:
+    name: "{{ item }}"
+    state: present
+    system: yes
+  with_flattened:
+    - system_groups
+    - [ 'nopwdsudo', 'sshlogin' ]
+
+- name: create initial users
+  user:
+    name: "{{ item['name'] }}"
+    create_home: yes
+    home: "{{ item['home'] }}"
+    generate_ssh_key: no
+    group: # primary group
+    groups: # additional groups
+    state: present
+  register: "user_{{ item['name'] }}"
+  with_items: initial_users
+
+- name: generate random password for users only if it was just changed
+  command: "/usr/bin/openssl rand -base64 32 | passwd --stdin {{ item['name'] }}"
+  with_items: initial_users
+  when: "user_{{ item['name'] }}.changed or force_password_update|bool"
+
+- name: setup ssh for new users
+  file:
+    status: directory
+    dest: "{{ item.home }}/.ssh"
+    mode: 0700
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+  with_items: initial_users

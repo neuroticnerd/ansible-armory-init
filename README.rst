@@ -42,6 +42,7 @@ configures the core security for a new ubuntu server
     *   X11Forwarding no
     *   UseDNS no
     *   AllowGroups sshlogin
+    *   Port {{ non_standard_ssh_port }}
 *   lock ssh to specific IPs if desired
     *   AllowUsers devops@(ip) devops@(another-ip)
 *   restart the ssh daemon
@@ -51,9 +52,21 @@ configures the core security for a new ubuntu server
 *   enable automatic security updates?
 *   install logwatch or other logging daemon
 
+http://serverfault.com/questions/545978/how-to-handle-ssh-port-changes-with-ansible
 
+https://support.ansible.com/hc/en-us/articles/201957837-How-do-I-split-an-action-into-a-multi-line-format-
+https://servercheck.in/blog/yaml-best-practices-ansible-playbooks-tasks
 
 sudo visudo
 
 # members of this group can sudo without a password
 %nopwdsudo   ALL=(ALL:ALL) NOPASSWD:ALL
+
+
+http://managing.blue/2014/09/30/ansible_managed/
+
+
+lockdown
+authorized
+foundation
+shell
