@@ -1,0 +1,46 @@
+---
+
+- name: create base user group
+  group:
+    name: "{{ base_user_name }}"
+    state: present
+
+- name: create base user
+  user:
+    name: "{{ base_user_name }}"
+    createhome: yes
+    home: "{{ base_user_home }}"
+    generate_ssh_key: no
+    shell: "/bin/bash"
+    group: "{{ base_user_name }}"
+    groups: "nopwdsudo,sshlogin"
+    state: present
+
+- name: generate random password for base user
+  command: "/usr/bin/openssl rand -base64 32 | passwd --stdin {{ base_user_name }}"
+  when: random_passwords|bool
+
+- name: ensure base user ssh directory exists
+  file:
+    state: directory
+    dest: "{{ base_user_home }}/.ssh"
+    owner: "{{ base_user_name }}"
+    group: "{{ base_user_name }}"
+    mode: 0700
+
+- name: generate authorized_keys file
+  template:
+    src: "authorized_keys.j2"
+    dest: "{{ base_user_home }}/.ssh/authorized_keys"
+    owner: "{{ base_user_name }}"
+    group: "{{ base_user_name }}"
+    mode: 0600
+
+- name: copy bash profile if it doesn't exist
+  copy:
+    src: bash-profile
+    dest: "{{ base_user_home }}/.bash_profile"
+    force: no
+    owner: "{{ base_user_name }}"
+    group: "{{ base_user_name }}"
+    mode: 0644

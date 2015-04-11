@@ -4,7 +4,8 @@
   apt:
     name: fail2ban
     state: latest
-  when: setup_fail2ban|bool
+  when: install_fail2ban|bool
+  notify: restart-fail2ban
 
 # coming soon! default config is usually sufficient
 #- name: deploy fail2ban config

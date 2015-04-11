@@ -10,7 +10,7 @@
     group=root
     mode=0644
 
-- name: add current hostname to hosts file
+- name: add inventory hostname to hosts file
   lineinfile: >
     dest="/etc/hosts"
     regexp="^127\.0\.0\.1\s+{{ inventory_hostname }}"
@@ -20,3 +20,14 @@
     group=root
     mode=0644
   when: inventory_hostname is defined
+
+- name: additional entries for the hosts file
+  lineinfile: >
+    dest="/etc/hosts"
+    regexp="^{{ item.address }}\s+{{ item.host }}"
+    line="{{ item.address }}   {{ item.host }}  # ansible managed"
+    state=present
+    owner=root
+    group=root
+    mode=0644
+  with_items: extra_hosts

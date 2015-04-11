@@ -1,17 +1,23 @@
 ---
 
-change_root_passwd: no
+# system-upgrade.yml
 dist_upgrade: yes
-setup_fail2ban: yes
-configure_fail2ban: no
 reboot_comment: "Ansible is rebooting system to complete upgrades"
 reboot_ssh_port: 22
 
+# hostsfile.yml
+loopback_aliases: []  # localhost aliases (+ inventory_hostname)
+extra_hosts: []  # # entries to add to the hosts file
+
+# fail2ban.yml
+install_fail2ban: yes
+configure_fail2ban: no
+
+# base_user.yml
 base_user_name: devops
 base_user_home: "/home/{{ base_user_name }}"
-
-initial_groups: []
-initial_users: []
-
+# base_user_pubkey: public-key  # must be set separately
+#initial_groups: []
+#initial_users: []
 random_passwords: no
 force_password_update: no

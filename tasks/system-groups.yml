@@ -1,0 +1,37 @@
+---
+
+- name: create sudoers file backup
+  command: cp -f /etc/sudoers /etc/sudoers.bak
+
+- name: create temporary sudoers file for safety
+  command: cp -f /etc/sudoers /etc/sudoers.tmp
+
+- name: make sure /etc/sudoers.d is included
+  lineinfile: >
+    dest=/etc/sudoers.tmp
+    state=present
+    regexp='^#includedir\s+/etc/sudoers.d'
+    line='#includedir /etc/sudoers.d'
+
+- name: verify sudoers file changes
+  command: visudo -q -c -f /etc/sudoers.tmp
+
+- name: update sudoers file
+  command: mv -f /etc/sudoers.tmp /etc/sudoers
+
+- name: make sure nopwdsudo group has sudo access
+  template:
+    src: nopwdsudo.j2
+    dest: /etc/sudoers.d/nopwdsudo
+    group: root
+    owner: root
+    mode: 0440
+
+- name: add system groups
+  group:
+    name: "{{ item }}"
+    state: present
+    system: yes
+  with_items:
+    - nopwdsudo
+    - sshlogin

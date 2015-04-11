@@ -1,9 +1,16 @@
 ---
 
-#- name: change root password
-#  when: change_root_passwd|bool
-
+# install system ugrades and reboot if necessary
 - include: system-upgrade.yml
+
+# ensure certain entries are present in /etc/hosts
 - include: hostsfile.yml
+
+# install fail2ban with default config
 - include: fail2ban.yml
-- include: accounts.yml
+
+# create system groups for sudo access
+- include: system-groups.yml
+
+# create a non-root 'default' user
+- include: base_user.yml

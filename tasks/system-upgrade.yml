@@ -3,18 +3,32 @@
 # https://realguess.net/2014/12/21/ansible-update-servers-to-the-latest-and-reboot/
 # https://coderwall.com/p/0nckqg/ansible-reboot-ubuntu-if-needed
 # sudo shutdown -h now  # <-- safe reboot
+- name: ensure update-notifier-common is installed
+  apt:
+    name: update-notifier-common
+    state: latest
+
 - name: check if upgrades are available
   command: /usr/lib/update-notifier/apt-check --package-names
   register: upgrades
-  changed_when: upgrades.stderr != ""
+  changed_when: "upgrades is defined and upgrades.stderr != ''"
   when: dist_upgrade|bool
 
 - name: update and upgrade system packages
   apt:
     update_cache: yes
     upgrade: dist
-  when: upgrades is defined and upgrades.stderr != ""
+  when: "upgrades is defined and upgrades.stderr != ''"
   register: upgraded
+
+- name: install dependencies
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - python-pip
+    - python-dev
+    - git
 
 - name: reboot server to apply updates
   command: "shutdown -r now '{{ reboot_comment }}'"
@@ -32,11 +46,11 @@
   local_action:
     module: wait_for
     #host: "{{ ansible_ssh_host | default(inventory_hostname) }}"
-    host: "{{ inventory_hostname|default(ansible_ssh_host) }}"
+    host: "{{ inventory_hostname | default(ansible_ssh_host) }}"
     port: "{{ reboot_ssh_port }}"
     state: started
-    delay: 15
-    connect_timeout: 15
+    delay: 20
+    connect_timeout: 10
     timeout: 300
   sudo: false
   when: rebooting|changed

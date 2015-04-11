@@ -5,9 +5,3 @@
     name: fail2ban
     state: restarted
     enabled: yes
-
-- name: restart-ssh
-  service:
-    name: ssh
-    state: restarted
-    enabled: yes
