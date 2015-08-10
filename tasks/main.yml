@@ -14,3 +14,12 @@
 
 # create a non-root 'default' user
 - include: base_user.yml
+
+
+- name: install common utilities
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - curl
+    - tmux
